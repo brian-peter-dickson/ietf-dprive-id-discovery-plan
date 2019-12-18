@@ -32,21 +32,13 @@ This document is a planning document to discuss IETF drafts (including requireme
 
 # Introduction & Scope
 
-The 2018 approved [charter of the IETF DPRIVE Working Group](https://datatracker.ietf.org/doc/charter-ietf-dprive/) contains milestones related to confidentiality aspects of DNS transactions between the iterative resolver and authoritative name servers.
+The deployment models for DNS resolution as originally documented, included only stub resolvers (clients) and full resolvers. In addition, there was no particular guidance concerning the use of network address translation (NAT) or of private address space (RFC1918). Subsequent deployment experience now not only frequently includes both of these, but also the use of forwarders (entities which are not full resolvers, but act as both clients and servers in an intermediary role), and more complex topologies (including directed graphs which may not be trees and are not guaranteed to be acyclic).
 
-This is also reflected in the [DPRIVE milestones](https://datatracker.ietf.org/wg/dprive/about/), which (as of October 2019) contains two relevant milestones:
+New standards have arisen which would benefit from the ability to query resolvers and forwarders for their local topology, where the entities may not have globally unique IP addresses and may not have their own fully qualified domain names (FQDNs). The information that such entities may further want to publish could include their names, their IP addresses, their roles, the methods by which they can be contacted by clients, as well as Trust Anchors (TAs) for DNSSEC. The published information may be signed if such DNSSEC TAs are used.
 
->Develop requirements for adding confidentiality to DNS exchanges
-between recursive resolvers and authoritative servers (unpublished
-document).
+This document intends to discuss the overall plan for a set of interrelated proposals (information, experimental, or standard track), requirements for those proposals, as well as preliminary content for those proposals. The proposals may be kept together in a follow-on document, or may be split into separate documents. The choices of WG may differ if these proposals are separated, depending on their relevance and scope. This may in turn lead to progress in investigating, developing and standardizing potential experimental methods of meeting those requirements or solidifying those proposals.
 
->Investigate potential solutions for adding confidentiality to DNS
-exchanges involving authoritative servers (Experimental).
-
-This document intends to cover the first milestone for defining requirements for adding confidentiality to DNS exchanges
-between recursive resolvers and authoritative servers. This may in turn lead to progress in investigating, developing and standardizing potential experimental methods of meeting those requirements.
-
-The motivation for this work is to extend the confidentiality methods used between a user's stub resolver and a recursive resolver to the recursive queries sent by recursive resolvers in response to a DNS lookup (when a cache miss occurs and the server must perform recursion to obtain a response to the query). A recursive resolver will send queries to root servers, to Top Level Domain (TLD) servers, to authoritative second level domain servers and potentially to other authoritative DNS servers and each of these query/response transactions presents an opportunity to extend the confidentiality of user DNS queries. 
+The motivation for this work is to facilitate discovery of actual full resolvers to which requests are forwarded, to enable the bypassing of intermediate entities when both possible and appropriate, and to enable selection of an appropriate subset according to the express policy goals of a given client. The methods are intended to support independent operation of intermediaries, incremental upgrades and deployments, and authentication of discovered information. The intent is to maximize the ability to achieve client privacy (e.g. via DoT or DoH), to verify the privacy status, to identify problems caused by incompatible network configurations (e.g. overlapping NAT addresses/scopes), and to at long last provide a "DNS traceroute" functionality of some manner.
 
 # Document Work Via GitHub
 
@@ -62,6 +54,9 @@ when, and only when, they appear in all capitals, as shown here.
 This document also makes use of DNS Terminology defined in {{!RFC8499}}
 
 # Threat Model and Problem Statement
+
+FIXME.
+(Copied text from original body of phase2-requirements follows.)
 
 Currently, protocols such as DoT provide encryption between the user's stub resolver and a recursive resolver. This potentially provides (1) protection from observation of end user DNS queries and responses, (2) protection from on-the-wire modification DNS queries or responses (including potentially forcing a downgrade to an unencrypted communication). Of course, observation and modification are still possible when performed by the recursive resolver, which decrypts queries, serves a response from cache or performs recursion to obtain a response (or synthesizes a response), and then encrypts the response and sends it back to the user's stub resolver. 
 
@@ -94,11 +89,11 @@ This entire document concerns the security of DNS traffic, so a specific section
 
 # IANA Considerations
 
-This document has no actions for IANA.
+This document has no actions for IANA. Yet.
 
 # Changelog
 
-Version 00: Updated prior individual draft following IETF-106 feedback
+Version 00: Intended for ongoing discussion prior to IETF 107 or in various WG email lists.
 
 # APPENDIX: Perspectives and Use Cases
 
