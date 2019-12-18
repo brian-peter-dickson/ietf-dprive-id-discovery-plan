@@ -70,8 +70,9 @@ This requires:
    * Identity of local server's name and address(es), and trust anchor(s)
       * Trust anchor may not be needed per se if an FQDN is used underneath a secure zone.
    * Function (resolver or forwarder)
-   * Each Upstream server's name and address(es)
-   * Each Upstream server's trust anchor(s) (if the upstream server does not have an FQDN in a signed zone)
+   * Each upstream server's name and address(es)
+   * Each upstream server's trust anchor(s) (if the upstream server does not have an FQDN in a signed zone)
+   * Each upstream server's function
 * Publication of a well-known relative DNAME to pass through queries to upstream server(s)
 * Facilitation of incremental deployment
 
@@ -93,6 +94,61 @@ The requirements of different interested stakeholders are outlined below.
 1. QNAME minimisation SHOULD be implemented in all steps of recursion 
 2. DNSSEC validation SHOULD be performed
 3. If upstream servers indicate that (1) multiple secure transport protocols are available or that (2) a secure transport and insecure transport are available, then per the recommendations in {{?RFC8305}} (aka Happy Eyeballs) a recursive server SHOULD initiate concurrent connections to available protocols. Consistent with Section 2 of {{?RFC8305}} this would be: (1) Initiation of asynchronous DNS queries to determine what transport protocols are reachable, (2) Sorting of resolved destination transport protocols, (3) Initiation of asynchronous connection attempts, and (4) Establishment of one connection, which cancels all other attempts. The local server SHOULD prefer secure transport over insecure transport among available transport protocols from step (2). The local server MAY abort the process prematurely once the first secure transport is confirmed as available.
+
+# Operation
+
+Each element of the overall topology (stub client, forwarders, resolver(s)) performs certain operations at particular times.
+
+These typically are triggered by start-up, or by topological changes, or by periodic re-validation of current state (such as in response to TTL expiry on relevant resource record sets).
+
+The minimum relevant deployment is an upgraded stub resolver, and at least one upgraded forwarder or resolver.
+
+## Server Initialization
+
+A server is either a resolver or a forwarder. A forwarder is both a client and a server, and both of the following steps are required. A resolver is not a client per se, and only the second step (authoritative zone publication) is performed.
+
+### Client Initialization
+
+This step is performed by forwarders. The forwarder must either learn the IP addresses of its upstream servers (e.g. via DHCP) or have those configured.
+
+Once the addresses are known, the server does the following for each address:
+1. Send a query for the well-known name "resolver-name.arpa" to the ip address
+1. Use the name in the response RDATA as the publication point for the information to obtain:
+ * Upstream server's name
+ * Upstream server's address(es)
+ * Upstream server's Trust Anchor (if applicable)
+ * Upstream server's function
+
+### Server Name and Trust Anchor Assignment
+
+If the server has an FQDN, this is used as the server name.
+
+Otherwise, the server MUST generate a globally unique, locally scoped name.
+
+The generated name is a random 12-character name of type hex-32 (alphabet 0-9a-v), with TLD suffix of ".zz", which contains 60 bits of entropy. If the PNRG is properly seeded, collisions in generated labels are exceedingly unlikely.
+
+A suitable method must be used for seeding the local PNRG in order to avoid predictable collisions among such assigned names. This includes obtaining adequate sources of entropy.
+
+For example, "example1245.zz" would not be generated due to the 'x' character falling outside the alphabet used. However, "linenoise000.zz" would be a possible result of a randomly generated name using this method.
+
+### Authoritative Data Publication
+
+Every server will publish the following information. (Some of the information is only required if the server's function is "forwarder".)
+
+1. The domain name "resolver-name.arpa" is published with RRTYPE <TBD> and RDATA of the server's name.
+1. If the server's name is an FQDN, AND the FQDN is a zone cut, AND the zone is DNSSEC signed with secure delegation and contains all of the remaining mandatory information, that FQDN-named zone is used as-is.
+1. Otherwise, the server's name is used as the name of the zone, is an island of security, and requires generation of DNSSEC public/private keys. The public key is published in the zone apex as a DNSKEY record, and the zone is signed with the private key.
+1. The remaining data here is published under a zone of SERVER_NAME, e.g. "linenoise000.zz".
+1. The admitedly-redundant apex RRTYPE <TBD> has RDATA of SERVER_NAME, e.g. "linenoise000.zz".
+1. The server function has name "server-function", RRTYPE "TXT", and value of either "resolver" or "forwarder".
+1. The server's address(es) are apex A and/or AAAA record(s).
+1. The trust anchor is an apex DNSKEY or DNSKEYs (plural if both KSK and ZSK are used).
+1. A well-known DNAME record of name "q" with RDATA of "." is required.
+1. If the server function is "forwarder", additional records with name "upstream", of type <TBD>, and values of the names obtained in the Client Initialization phase are added to the zone.
+1. For each name in the list of "upstream", a set of records is created for the addresses, trust anchor(s), and function, with name of UPSTREAM_NAME (underneath the current zone SERVER_NAME, i.e. UPSTREAM_NAME.SERVER_NAME).
+1. The types A, AAAA, and DNSKEY (or is it DS?) are at the exact name UPSTREAM_NAME.SERVER_NAME, while the function is at "function".UPSTREAM_NAME.SERVER_NAME.
+
+## Stub Client Initialization
 
 # Security Considerations
 
