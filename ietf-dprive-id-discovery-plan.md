@@ -1,7 +1,7 @@
 ---
-title: DNS Privacy Requirements for Exchanges between Recursive Resolvers and Authoritative Servers
-abbrev: DPRIVE Phase 2 Requirements
-docname: draft-ietf-dprive-phase2-requirements-00
+title: Planning document for DNS resolver identity, discovery, privacy and security.
+abbrev: DPRIVE ID-Discovery-plan
+docname: draft-ietf-dprive-id-discovery-plan-00
 category: info
 
 ipr: trust200902
@@ -14,20 +14,11 @@ pi: [toc, sortrefs, symrefs]
 
 author:
  -
-    ins: J. Livingood
-    name: Jason Livingood
-    organization: Comcast
-    email: Jason_Livingood@comcast.com
- -
-    ins: A. Mayrhofer
-    name: Alexander Mayrhofer
-    organization: nic.at GmbH
-    email: alex.mayrhofer.ietf@gmail.com
- - 
-    ins: B. Overeinder
-    name: Benno Overeinder
-    organization: NLnet Labs
-    email: benno@NLnetLabs.nl
+    ins: B. Dickson
+    name: Brian Dickson
+    organization: GoDaddy
+    email: brian.peter.dickson@gmail.com
+
 
 normative:
 
