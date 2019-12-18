@@ -60,9 +60,11 @@ FIXME (beginning rough draft)
 ## Problem Statements (paraphrased)
 
 * Facilitate incremental deployment
-* Use known FQDN, or generate globally-unique locally-significant name
-* Publish topologically local information authoritatively:
+* Server identity assignment: use a pre-existing (known() FQDN, or generate globally-unique locally-significant name
+* Server identity discovery: use a global name with local-only significance to discovery the server identity (name)
+* Publish topologically-local information authoritatively under the server's name (FQDN or generated name):
    * Identify local server's name and address(es), and trust anchor(s)
+      * Trust anchor may not be needed per se if an FQDN is used underneath a secure zone.
    * Function (resolver or forwarder)
    * Upstream servers' name(s) and address(es)
    * Upstream servers' trust anchor(s)
