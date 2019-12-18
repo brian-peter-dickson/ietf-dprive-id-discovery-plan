@@ -7,7 +7,7 @@ category: info
 ipr: trust200902
 area: General
 workgroup: DPRIVE
-keyword: DNS, Encryption, Privacy 
+keyword: DNS, Encryption, Privacy, Discovery, Security
 
 stand_alone: yes
 pi: [toc, sortrefs, symrefs]
@@ -185,9 +185,9 @@ A suitable method must be used for seeding the local PNRG in order to avoid pred
 
 For example, "example1245.zz" would not be generated due to the 'x' character falling outside the alphabet used. However, "linenoise000.zz" would be a possible result of a randomly generated name using this method.
 
-### Authoritative Data Publication
+### Authoritative Data Publication by Forwarders and Resolvers
 
-Every server will publish the following information. (Some of the information is only required if the server's function is "forwarder".)
+Every server (forwarder/resolver) SHOULD publish the following information. (Some of the information is only required if the server's function is "forwarder".)
 
 1. The domain name "resolver-name.arpa" is published with RRTYPE <TBD> and RDATA of the server's name.
 1. If the server's name is an FQDN, AND the FQDN is a zone cut, AND the zone is DNSSEC signed with secure delegation and contains all of the remaining mandatory information, that FQDN-named zone is used as-is.
@@ -242,12 +242,12 @@ The privacy and confidentiality of Users (that is, users as in clients of recurs
   * Qname minimisation {{?RFC7816}}, reducing the amount of information to that which is absolutely necessary to resolve a query
   * Aggressive NSEC/local auth cache {{?RFC8198}}, reducing the amount of outgoing queries in the first place
   * Encryption, removing exposure of information while in transit 
+  
+The residual issue on Encryption, is that DNS forwarders (as opposed to true resolvers) may be involved in ways of which the user is unaware. Discover and use of the actual (ultimate) resolver(s) and selection of both the resolver choice and transport choice, are necessary to give the user choice and control, and/or to provide software to act on the users' behalf to implement high-level preferences for privacy.
 
-As recursors typically forwards queries received from the user to authoritative servers.  This creates a transitive trust between the user and the recursor, as well as the authoritative server, since information created by the user is exposed to the authoritative server.  However, the user never has a chance to identify which data was exposed to which authoritative party (via which path).
+Users may want to be informed about the status of the connections which were made on their behalf, which adds another point
 
-Also, Users would want to be informed about the status of the connections which were made on their behalf, which adds a fourth point
-
-Encryption/privacy status signaling
+Encryption/privacy status signaling, via in-band well-known DNS targets(?): something like "how-did-my-query-resolve.example.com", or "what-resolver-name-and-ip-was-used.example.com".
 
 **TODO**: Actual requirements - what do users "want"? Start below:
 
@@ -290,11 +290,8 @@ Those two sides are typically operated by different entities, but many entities 
 Implementer requirements follows requirements from user and operator perspectives:
 
   * Non-functional requirements, e.g. diversity of implementations
-  * Horizontal vs. vertical scaling, for example similar to http servers
   * Use of DANE {{?RFC6698}} for authentication: strict vs. opportunistic
   * Incremental deployment
-  * Cache reuse vs. downgrade?  Does the cache need to be partitioned?  When can an in-cache answer retrieved via cleartext be served encrypted to a recursive query?
-  * (Use of TCP fast open) - but this might be a requirement for the actual encryption protocol
 
 **TODO**: Actual requirements of implementors - essentially, they follow what Operators need?
 
