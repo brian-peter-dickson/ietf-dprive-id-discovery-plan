@@ -26,7 +26,7 @@ informative:
 
 --- abstract
 
-This document provides requirements for adding confidentiality to DNS exchanges between recursive resolvers and authoritative servers. 
+This document is a planning document to discuss IETF drafts (including requirements) for DNS resolver identity, discovery, privacy and security.
 
 --- middle
 
