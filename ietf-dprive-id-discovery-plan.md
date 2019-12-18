@@ -69,9 +69,10 @@ This requires:
 * Authoritative signed publication of topologically-local information under the server's name (FQDN or generated name):
    * Identity of local server's name and address(es), and trust anchor(s)
       * Trust anchor may not be needed per se if an FQDN is used underneath a secure zone.
-   * Function (resolver or forwarder)
+   * TLSA record(s) for server's certificate (for TLS validation)
+   * Function (resolver, forwarder, or RPZ resolver)
    * Each upstream server's name and address(es)
-   * Each upstream server's trust anchor(s) (if the upstream server does not have an FQDN in a signed zone)
+   * Each upstream server's trust anchor(s) (if the upstream server does not have an FQDN in a signed zone, or if upstream server has a separate trust anchor for RPZ responses)
    * Each upstream server's function
 * Publication of a well-known relative DNAME to pass through queries to upstream server(s)
 * Facilitation of incremental deployment
@@ -120,12 +121,33 @@ The requirements of different interested stakeholders are outlined below.
 5. The upgraded server (forwarder or resolver) MUST have the option to specify their secure transport preferences (e.g. what specific protocols are supported). This SHALL include a method to publish a list of secure transport protocols (e.g. DoH, DoT and other future protocols not yet developed). In addition this SHALL include whether a secure transport protocol MUST always be used (non-downgradable) or whether a secure transport protocol MAY be used on an opportunistic (not strict) basis. 
 6. The upgraded forwarder MUST have the option to vary their preferences on a server to server basis, due to the fact that individual upstream servers (forwarders or resolvers) may be operated independently, and may offer different transport protocols (encrypted or otherwise). 
 7. The specification of secure transport preferences MUST be performed using the DNS and MUST NOT depend on non-DNS protocols.
-8. For the secure transport, TLS 1.3 (or later versions) MUST be supported and downgrades from TLS 1.3 to prior versions MUST not occur.
+8. For the secure transport, TLS 1.3 (or later versions) MUST be supported and downgrades from TLS 1.3 to prior versions MUST not occur. TLSA records MUST be used if present. TLSA records SHOULD be published.
 
 ## Optional Requirements
 1. QNAME minimisation SHOULD be implemented in all steps of recursion 
 2. DNSSEC validation SHOULD be performed
-3. If upstream servers indicate that (1) multiple secure transport protocols are available or that (2) a secure transport and insecure transport are available, then per the recommendations in {{?RFC8305}} (aka Happy Eyeballs) a recursive server SHOULD initiate concurrent connections to available protocols. Consistent with Section 2 of {{?RFC8305}} this would be: (1) Initiation of asynchronous DNS queries to determine what transport protocols are reachable, (2) Sorting of resolved destination transport protocols, (3) Initiation of asynchronous connection attempts, and (4) Establishment of one connection, which cancels all other attempts. The local server SHOULD prefer secure transport over insecure transport among available transport protocols from step (2). The local server MAY abort the process prematurely once the first secure transport is confirmed as available.
+3. If upstream servers indicate that (1) multiple secure transport protocols are available or that (2) a secure transport and insecure transport are available, then per the recommendations in {{?RFC8305}} (aka Happy Eyeballs) a recursive server SHOULD initiate concurrent connections to available protocols. Consistent with Section 2 of {{?RFC8305}} this would be: (1) Initiation of asynchronous DNS queries to determine what transport protocols are reachable, (2) Sorting of resolved destination transport protocols, (3) Initiation of asynchronous connection attempts, and (4) Establishment of one connection, which cancels all other attempts. The local server SHOULD prefer secure transport over insecure transport among available transport protocols from step (2). The local server MAY abort the process prematurely once the first secure transport is confirmed as available. 
+1. Additional diagnostic information MAY be included in the set of Published data, intended for human use. This could include any or all of the following:
+* Server address as a client to upstream
+* Server transport protocol(s) to upstream, including current, preference/order, and unavailable-but-advertised
+* DHCP range on server (to clients)
+* Client information (e.g. extracted from IP or DNS headers, like address, port, TTL, EDNS options)
+* Manufacturer information, including:
+   * management URI
+   * firmware version
+   * make, model
+   * serial number
+   * manufacturing date
+   * embedded DNSSEC trust anchor
+   * uptime
+   * logging configuration
+* Upstream status, age of status, last try
+* Upstream IP TTL
+* NAT info, including mapped addresses, 1:1 NAT vs NATP
+* SIG(0)?
+* TSIG?
+* Policy?
+* ASNs?
 
 # Operation
 
@@ -181,6 +203,14 @@ Every server will publish the following information. (Some of the information is
 1. The types A, AAAA, and DNSKEY (or is it DS?) are at the exact name UPSTREAM_NAME.SERVER_NAME, while the function is at "function".UPSTREAM_NAME.SERVER_NAME.
 
 ## Stub Client Initialization
+
+The stub client (if upgraded to these standards) SHOULD walk the graph of upstream forwarders and resolvers, and synthesize a complete topology of connections, including transport protocols, addresses, and names.
+
+The stub client MAY be augmented by use of a local forwarder (e.g. running on a loopback address such as 127.0.0.1 and/or ::1), as the first upgraded component of the overall topology, in which case the stub client itself only needs to point to this loopback upgraded server.
+
+The stub client MUST determine the direct reachability of all discovered resolvers, including the offered transports and their respective status (reachable on particular ports) and validate any applicable certificates (e.g. TLS) prior to use. The client MUST ensure no downgrade occurs as long as any encrypted connection is available. The client SHOULD prioritize the resolvers based on ongoing observed performance (including loss, latency, validation, etc.)
+
+The validation should include independent validation of the data in an "upstream" publication set against the data published on the authoritative side of the upstream server itself.
 
 # Security Considerations
 
