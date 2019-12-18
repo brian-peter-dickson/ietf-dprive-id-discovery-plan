@@ -55,28 +55,25 @@ This document also makes use of DNS Terminology defined in {{!RFC8499}}
 
 # Threat Model and Problem Statement
 
-FIXME (beginning rough draft)
+Currently, protocols such as DoT provide encryption between the user's stub resolver and a recursive resolver. This potentially provides (1) protection from observation of end user DNS queries and responses, (2) protection from on-the-wire modification DNS queries or responses (including potentially forcing a downgrade to an unencrypted communication).
+
+The problem is that the stub resolver is currently unable to distinguish between a forwarder and a resolver -- they both return the desired results when queries are sent appropriately. Thus, an encrypted channel to a forwarder may result in queries being forwarded over a non-encrypted channel, defeating the purpose of using encryption. 
 
 ## Problem Statements (paraphrased)
 
-* Facilitate incremental deployment
+In order for a stub resolver to establish an encrypted connection to the actual (ultimate) resolver in a forwarder chain to a resolver, it must be possible to for the resolver and some or all of the forwarders to have unique names, to publish the information about their immediate topological neighbors in the forwarder chain, for the stub to validate the published information, and for the stub to integrate the component topologies into a complete picture of the available resolvers and protocols.
+
+This requires:
 * Server identity assignment: use a pre-existing (known() FQDN, or generate globally-unique locally-significant name
 * Server identity discovery: use a global name with local-only significance to discovery the server identity (name)
-* Publish topologically-local information authoritatively under the server's name (FQDN or generated name):
-   * Identify local server's name and address(es), and trust anchor(s)
+* Authoritative signed publication of topologically-local information under the server's name (FQDN or generated name):
+   * Identity of local server's name and address(es), and trust anchor(s)
       * Trust anchor may not be needed per se if an FQDN is used underneath a secure zone.
    * Function (resolver or forwarder)
-   * Upstream servers' name(s) and address(es)
-   * Upstream servers' trust anchor(s)
-* Sign published information using trust anchor private key(s)
-* Create DNAME record(s?) to pass through queries to upstream server(s)
-
-FIXME.
-(Copied text from original body of phase2-requirements follows.)
-
-Currently, protocols such as DoT provide encryption between the user's stub resolver and a recursive resolver. This potentially provides (1) protection from observation of end user DNS queries and responses, (2) protection from on-the-wire modification DNS queries or responses (including potentially forcing a downgrade to an unencrypted communication). Of course, observation and modification are still possible when performed by the recursive resolver, which decrypts queries, serves a response from cache or performs recursion to obtain a response (or synthesizes a response), and then encrypts the response and sends it back to the user's stub resolver. 
-
-But observation and modification threats still exist when a recursive resolver must perform DNS recursion, from the root to TLD to authoritative servers. This document specifies requirements for filling those gaps. 
+   * Each Upstream server's name and address(es)
+   * Each Upstream server's trust anchor(s) (if the upstream server does not have an FQDN in a signed zone)
+* Publication of a well-known relative DNAME to pass through queries to upstream server(s)
+* Facilitation of incremental deployment
 
 # Requirements
 
@@ -86,11 +83,11 @@ The requirements of different interested stakeholders are outlined below.
 1. Each implementing party should be able to independently take incremental steps to meet requirements without the need for close coordination (e.g. loosely coupled) 
 2. Use a secure transport protocol between a client and an upgraded server (forwarder or resolver)
 3. Use a secure transport protocol between an upgraded forwarder and an upgraded server (forwarder or resolver)
-5. The secure transport MUST only be established when referential integrity can be verified, MUST NOT have circular dependencies, and MUST be easily analyzed for diagnostic purposes. 
-7. The upgraded server (forwarder or resolver) MUST have the option to specify their secure transport preferences (e.g. what specific protocols are supported). This SHALL include a method to publish a list of secure transport protocols (e.g. DoH, DoT and other future protocols not yet developed). In addition this SHALL include whether a secure transport protocol MUST always be used (non-downgradable) or whether a secure transport protocol MAY be used on an opportunistic (not strict) basis. 
-8. The upgraded forwarder MUST have the option to vary their preferences on a server to server basis, due to the fact that individual upstream servers (forwarders or resolvers) may be operated independently, and may offer different transport protocols (encrypted or otherwise). 
-9. The specification of secure transport preferences MUST be performed using the DNS and MUST NOT depend on non-DNS protocols.
-10. For the secure transport, TLS 1.3 (or later versions) MUST be supported and downgrades from TLS 1.3 to prior versions MUST not occur.
+4. The secure transport MUST only be established when referential integrity can be verified, MUST NOT have circular dependencies, and MUST be easily analyzed for diagnostic purposes. 
+5. The upgraded server (forwarder or resolver) MUST have the option to specify their secure transport preferences (e.g. what specific protocols are supported). This SHALL include a method to publish a list of secure transport protocols (e.g. DoH, DoT and other future protocols not yet developed). In addition this SHALL include whether a secure transport protocol MUST always be used (non-downgradable) or whether a secure transport protocol MAY be used on an opportunistic (not strict) basis. 
+6. The upgraded forwarder MUST have the option to vary their preferences on a server to server basis, due to the fact that individual upstream servers (forwarders or resolvers) may be operated independently, and may offer different transport protocols (encrypted or otherwise). 
+7. The specification of secure transport preferences MUST be performed using the DNS and MUST NOT depend on non-DNS protocols.
+8. For the secure transport, TLS 1.3 (or later versions) MUST be supported and downgrades from TLS 1.3 to prior versions MUST not occur.
 
 ## Optional Requirements
 1. QNAME minimisation SHOULD be implemented in all steps of recursion 
@@ -110,6 +107,8 @@ This document has no actions for IANA. Yet.
 Version 00: Intended for ongoing discussion prior to IETF 107 or in various WG email lists.
 
 # APPENDIX: Perspectives and Use Cases
+
+FIXME.
 
 The DNS resolving process involves several entities.  These entities have different interests/requirements, and hence it does make sense to examine the interests of those entities separately - though in many cases their interests are aligned.  Four different entities can be identified, and their interests are described in the following sections:
 
