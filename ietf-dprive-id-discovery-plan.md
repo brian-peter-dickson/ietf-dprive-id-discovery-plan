@@ -69,6 +69,7 @@ This requires:
 * Authoritative signed publication of topologically-local information under the server's name (FQDN or generated name):
    * Identity of local server's name and address(es), and trust anchor(s)
       * Trust anchor may not be needed per se if an FQDN is used underneath a secure zone.
+   * Issuance of cert for server (possibly self-signed if not an FQDN)
    * TLSA record(s) for server's certificate (for TLS validation)
    * Function (resolver, forwarder, or RPZ resolver)
    * Each upstream server's name and address(es)
