@@ -55,6 +55,20 @@ This document also makes use of DNS Terminology defined in {{!RFC8499}}
 
 # Threat Model and Problem Statement
 
+FIXME (beginning rough draft)
+
+## Problem Statements (paraphrased)
+
+* Facilitate incremental deployment
+* Use known FQDN, or generate globally-unique locally-significant name
+* Publish topologically local information authoritatively:
+   * Identify local server's name and address(es), and trust anchor(s)
+   * Function (resolver or forwarder)
+   * Upstream servers' name(s) and address(es)
+   * Upstream servers' trust anchor(s)
+* Sign published information using trust anchor private key(s)
+* Create DNAME record(s?) to pass through queries to upstream server(s)
+
 FIXME.
 (Copied text from original body of phase2-requirements follows.)
 
@@ -68,20 +82,18 @@ The requirements of different interested stakeholders are outlined below.
 
 ## Mandatory Requirements
 1. Each implementing party should be able to independently take incremental steps to meet requirements without the need for close coordination (e.g. loosely coupled) 
-2. Use a secure transport protocol between a recursive resolver and authoritative servers 
-3. Use a secure transport protocol between a recursive resolver and TLD servers 
-4. Use a secure transport protocol between a recursive resolver and the root servers 
-5. The secure transport MUST only be established when referential integrity can be verified, MUST NOT have circular dependencies, and MUST be easily analyzed for diagnostic purposes.
-6. Use a secure transport protocol or other DNS privacy protections in a manner that enables operators to perform appropriate performance and security monitoring, conduct relevant research, etc. 
-7. The authoritative domain owner or their administrator MUST have the option to specify their secure transport preferences (e.g. what specific protocols are supported). This SHALL include a method to publish a list of secure transport protocols (e.g. DoH, DoT and other future protocols not yet developed). In addition this SHALL include whether a secure transport protocol MUST always be used (non-downgradable) or whether a secure transport protocol MAY be used on an opportunistic (not strict) basis. 
-8. The authoritative domain owner or their administrator MUST have the option to vary their preferences on an authoritative nameserver to nameserver basis, due to the fact that administration of a particular DNS zone may be delegated to multiple parties (such as several CDNs), each of which may have different technical capabilities. 
+2. Use a secure transport protocol between a client and an upgraded server (forwarder or resolver)
+3. Use a secure transport protocol between an upgraded forwarder and an upgraded server (forwarder or resolver)
+5. The secure transport MUST only be established when referential integrity can be verified, MUST NOT have circular dependencies, and MUST be easily analyzed for diagnostic purposes. 
+7. The upgraded server (forwarder or resolver) MUST have the option to specify their secure transport preferences (e.g. what specific protocols are supported). This SHALL include a method to publish a list of secure transport protocols (e.g. DoH, DoT and other future protocols not yet developed). In addition this SHALL include whether a secure transport protocol MUST always be used (non-downgradable) or whether a secure transport protocol MAY be used on an opportunistic (not strict) basis. 
+8. The upgraded forwarder MUST have the option to vary their preferences on a server to server basis, due to the fact that individual upstream servers (forwarders or resolvers) may be operated independently, and may offer different transport protocols (encrypted or otherwise). 
 9. The specification of secure transport preferences MUST be performed using the DNS and MUST NOT depend on non-DNS protocols.
 10. For the secure transport, TLS 1.3 (or later versions) MUST be supported and downgrades from TLS 1.3 to prior versions MUST not occur.
 
 ## Optional Requirements
 1. QNAME minimisation SHOULD be implemented in all steps of recursion 
 2. DNSSEC validation SHOULD be performed
-3. If an authoritative domain owner or their administrator indicates that (1) multiple secure transport protocols are available or that (2) a secure transport and insecure transport are available, then per the recommendations in {{?RFC8305}} (aka Happy Eyeballs) a recursive server SHOULD initiate concurrent connections to available protocols. Consistent with Section 2 of {{?RFC8305}} this would be: (1) Initiation of asynchronous DNS queries to determine what transport protocols are supported, (2) Sorting of resolved destination transport protocols, (3) Initiation of asynchronous connection attempts, and (4) Establishment of one connection, which cancels all other attempts.
+3. If upstream servers indicate that (1) multiple secure transport protocols are available or that (2) a secure transport and insecure transport are available, then per the recommendations in {{?RFC8305}} (aka Happy Eyeballs) a recursive server SHOULD initiate concurrent connections to available protocols. Consistent with Section 2 of {{?RFC8305}} this would be: (1) Initiation of asynchronous DNS queries to determine what transport protocols are reachable, (2) Sorting of resolved destination transport protocols, (3) Initiation of asynchronous connection attempts, and (4) Establishment of one connection, which cancels all other attempts. The local server SHOULD prefer secure transport over insecure transport among available transport protocols from step (2). The local server MAY abort the process prematurely once the first secure transport is confirmed as available.
 
 # Security Considerations
 
