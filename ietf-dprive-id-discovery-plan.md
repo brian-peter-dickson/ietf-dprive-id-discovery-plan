@@ -217,19 +217,19 @@ The validation should include independent validation of the data in an "upstream
 
 The "before" picture representing a fairly simple example topology involving stub, forwarders, and resolver:
 
-Client (application) -> stub -> forwarder -> forwarder -> resolver
+> Client (application) -> stub -> forwarder -> forwarder -> resolver
 
 The "first iteration" with a minimum set of upgraded services/servers:
 
-Client (application) -> stub -> local upgraded "stub" forwarder -> forwarder #1 -> forwarder #2 -> upgraded resolver
+> Client (application) -> stub -> local upgraded "stub" forwarder -> forwarder #1 -> forwarder #2 -> upgraded resolver
 
 The "incremental" iteration:
 
-Client -> stub -> local upgraded "stub" forwarder -> upgraded forwarder #1 -> forwarder #2 -> upgraded resolver
+> Client -> stub -> local upgraded "stub" forwarder -> upgraded forwarder #1 -> forwarder #2 -> upgraded resolver
 
 The "final" iteration for the same topology:
 
-Client -> stub -> local upgraded "stub" forwarder -> upgraded forwarder #1 -> upgraded forwarder #2 -> upgraded resolver
+> Client -> stub -> local upgraded "stub" forwarder -> upgraded forwarder #1 -> upgraded forwarder #2 -> upgraded resolver
 
 If we assign server names to upgraded entities, as follows:
 * upgraded "stub": 68r63skiq1fo.zz
