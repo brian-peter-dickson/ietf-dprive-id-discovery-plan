@@ -229,11 +229,11 @@ The "first iteration" with a *minimum set* of upgraded services/servers:
 
 The "incremental" iteration (entirely optional, but doesn't break things):
 
-> Client -> stub -> local upgraded "stub" forwarder -> upgraded forwarder #1 -> forwarder #2 -> upgraded resolver
+> Client -> stub -> local *upgraded* "stub" forwarder -> *upgraded* forwarder #1 -> forwarder #2 -> *upgraded* resolver
 
 The "final" iteration for the same topology (also optional):
 
-> Client -> stub -> local upgraded "stub" forwarder -> upgraded forwarder #1 -> upgraded forwarder #2 -> upgraded resolver
+> Client -> stub -> local *upgraded* "stub" forwarder -> *upgraded* forwarder #1 -> *upgraded* forwarder #2 -> *upgraded* resolver
 
 If we assign server names to upgraded entities, as follows:
 * upgraded "stub": 68r63skiq1fo.zz
