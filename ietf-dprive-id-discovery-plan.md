@@ -232,10 +232,10 @@ The "final" iteration for the same topology:
 Client -> stub -> local upgraded "stub" forwarder -> upgraded forwarder #1 -> upgraded forwarder #2 -> upgraded resolver
 
 If we assign server names to upgraded entities, as follows:
-> upgraded "stub": 68r63skiq1fo.zz
-> upgraded forwarder #1: c9u7lufag0gj.zz
-> upgraded forwarder #2: jn1j2s7fq8lb.zz
-> upgraded resolver: fm82emigi7su.zz
+* upgraded "stub": 68r63skiq1fo.zz
+* upgraded forwarder #1: c9u7lufag0gj.zz
+* upgraded forwarder #2: jn1j2s7fq8lb.zz
+* upgraded resolver: fm82emigi7su.zz
 
 resolver's configured "resolver-name.arpa" would be "fm82emigi7su.zz".
 resolver would have a generated self-signed certificate, and use the public key fingerprint for its TLSA record of type 3.
@@ -253,6 +253,7 @@ resolver's zone for "fm82emigi7su.zz" would be (in BIND syntax):
     / the entire zone would be DNSSEC signed using its private key (single key or ZSK as appropraite).
 
 upgraded forwarder #2 would be similarly configured, except it would include more values, e.g.:
+
     ORIGIN jn1j2s7fq8lb.zz
     // similar stuff to resolver example above, plus...
     server-function TXT "forwarder"
