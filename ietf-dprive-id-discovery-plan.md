@@ -200,7 +200,7 @@ Every server (forwarder/resolver) SHOULD publish the following information. (Som
 1. The admitedly-redundant apex RRTYPE <TBD> has RDATA of SERVER_NAME, e.g. "linenoise000.zz".
 1. The server function has name "server-function", RRTYPE "TXT", and value of either "resolver" or "forwarder".
 1. The server's address(es) are apex A and/or AAAA record(s).
-1. The server's suported transport protocols (e.g. DoT, DoH, TCP/53, UDP/53, possibly including non-standard port numbers)
+1. The server's suported transport protocols (e.g. DoT, DoH, TCP/53, UDP/53, possibly including non-standard port numbers), at the name "protocols", RRTYPE "TXT", one RR per protocol, enumerated list of values TBD. (Or, SRV or some similar type of RRTYPE?)
 1. The trust anchor is an apex DNSKEY or DNSKEYs (plural if both KSK and ZSK are used).
 1. A well-known DNAME record of name "q" with RDATA of "." is required.
 1. If the server function is "forwarder", additional records with name "upstream", of type <TBD>, and values of the names obtained in the Client Initialization phase are added to the zone.
@@ -253,6 +253,9 @@ resolver's zone for "fm82emigi7su.zz" would be (in BIND syntax):
     @ TLSA # TLSA stuff
     q DNAME .
     server-function TXT "resolver"
+    protocols TXT "UDP/53"
+    protcols TXT "TCP/53"
+    protocols TXT "DoT"
     // optional extra stuff in zone
     / the entire zone would be DNSSEC signed using its private key (single key or ZSK as appropraite).
 
