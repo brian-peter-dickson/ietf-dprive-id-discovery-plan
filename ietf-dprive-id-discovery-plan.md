@@ -232,37 +232,37 @@ The "final" iteration for the same topology:
 Client -> stub -> local upgraded "stub" forwarder -> upgraded forwarder #1 -> upgraded forwarder #2 -> upgraded resolver
 
 If we assign server names to upgraded entities, as follows:
-upgraded "stub": 68r63skiq1fo.zz
-upgraded forwarder #1: c9u7lufag0gj.zz
-upgraded forwarder #2: jn1j2s7fq8lb.zz
-upgraded resolver: fm82emigi7su.zz
+> upgraded "stub": 68r63skiq1fo.zz
+> upgraded forwarder #1: c9u7lufag0gj.zz
+> upgraded forwarder #2: jn1j2s7fq8lb.zz
+> upgraded resolver: fm82emigi7su.zz
 
 resolver's configured "resolver-name.arpa" would be "fm82emigi7su.zz".
 resolver would have a generated self-signed certificate, and use the public key fingerprint for its TLSA record of type 3.
 resolver's zone for "fm82emigi7su.zz" would be (in BIND syntax):
 
-ORIGIN fm82emigi7su.zz
-@ SOA # SOA stuff follows
-@ A IP.AD.DR.ESS
-@ AAAA ip:v6:a:dd:r:e:s:s
-@ DNSKEY # dnskey stuff
-@ TLSA # TLSA stuff
-q DNAME .
-server-function TXT "resolver"
-// optional extra stuff in zone
-// the entire zone would be DNSSEC signed using its private key (single key or ZSK as appropraite).
+> ORIGIN fm82emigi7su.zz
+> @ SOA # SOA stuff follows
+> @ A IP.AD.DR.ESS
+> @ AAAA ip:v6:a:dd:r:e:s:s
+> @ DNSKEY # dnskey stuff
+> @ TLSA # TLSA stuff
+> q DNAME .
+> server-function TXT "resolver"
+> // optional extra stuff in zone
+> // the entire zone would be DNSSEC signed using its private key (single key or ZSK as appropraite).
 
 upgraded forwarder #2 would be similarly configured, except it would include more values, e.g.:
-ORIGIN jn1j2s7fq8lb.zz
-// similar stuff to resolver example above, plus...
-server-function TXT "forwarder"
-// the following would be discovered first by querying the configured upstream A/AAAA address
-// then publishing that data in this zone, for example:
-upstream PTR "fm82emigi7su.zz"
-fm82emigi7su.zz A IP.AD.DR.ESS
-fm82emigi7su.zz AAAA ip:v6:a:dd:r:e:s:s
-fm82emigi7su.zz DS # DS record contents here
-function.fm82emigi7su.zz TXT "resolver"
+> ORIGIN jn1j2s7fq8lb.zz
+> // similar stuff to resolver example above, plus...
+> server-function TXT "forwarder"
+> // the following would be discovered first by querying the configured upstream A/AAAA address
+> // then publishing that data in this zone, for example:
+> upstream PTR "fm82emigi7su.zz"
+> fm82emigi7su.zz A IP.AD.DR.ESS
+> fm82emigi7su.zz AAAA ip:v6:a:dd:r:e:s:s
+> fm82emigi7su.zz DS # DS record contents here
+> function.fm82emigi7su.zz TXT "resolver"
 
 upgraded forwarder #1 would be similarly configured, except ITS upstream would be jn1j2s7fq8lb.zz,
 and it would have no references to the resolver (fm82emigi7su.zz).
