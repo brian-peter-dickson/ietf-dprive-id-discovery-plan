@@ -221,7 +221,7 @@ The "before" picture representing a fairly simple example topology involving stu
 
 The "first iteration" with a minimum set of upgraded services/servers:
 
-> Client (application) -> stub -> local upgraded "stub" forwarder -> forwarder #1 -> forwarder #2 -> upgraded resolver
+> Client -> stub -> local upgraded "stub" forwarder -> forwarder #1 -> forwarder #2 -> upgraded resolver
 
 The "incremental" iteration:
 
