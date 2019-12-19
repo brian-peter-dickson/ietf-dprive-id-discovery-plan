@@ -232,10 +232,47 @@ The "final" iteration for the same topology:
 Client -> stub -> local upgraded "stub" forwarder -> upgraded forwarder #1 -> upgraded forwarder #2 -> upgraded resolver
 
 If we assign server names to upgraded entities, as follows:
-upgraded "stub":
-upgraded forwarder #1:
-upgraded forwarder #2:
-upgraded resolver: 
+upgraded "stub": 68r63skiq1fo.zz
+upgraded forwarder #1: c9u7lufag0gj.zz
+upgraded forwarder #2: jn1j2s7fq8lb.zz
+upgraded resolver: fm82emigi7su.zz
+
+resolver's configured "resolver-name.arpa" would be "fm82emigi7su.zz".
+resolver would have a generated self-signed certificate, and use the public key fingerprint for its TLSA record of type 3.
+resolver's zone for "fm82emigi7su.zz" would be (in BIND syntax):
+
+ORIGIN fm82emigi7su.zz
+@ SOA # SOA stuff follows
+@ A IP.AD.DR.ESS
+@ AAAA ip:v6:a:dd:r:e:s:s
+@ DNSKEY # dnskey stuff
+@ TLSA # TLSA stuff
+q DNAME .
+server-function TXT "resolver"
+// optional extra stuff in zone
+// the entire zone would be DNSSEC signed using its private key (single key or ZSK as appropraite).
+
+upgraded forwarder #2 would be similarly configured, except it would include more values, e.g.:
+ORIGIN jn1j2s7fq8lb.zz
+// similar stuff to resolver example above, plus...
+server-function TXT "forwarder"
+// the following would be discovered first by querying the configured upstream A/AAAA address
+// then publishing that data in this zone, for example:
+upstream PTR "fm82emigi7su.zz"
+fm82emigi7su.zz A IP.AD.DR.ESS
+fm82emigi7su.zz AAAA ip:v6:a:dd:r:e:s:s
+fm82emigi7su.zz DS # DS record contents here
+function.fm82emigi7su.zz TXT "resolver"
+
+upgraded forwarder #1 would be similarly configured, except ITS upstream would be jn1j2s7fq8lb.zz,
+and it would have no references to the resolver (fm82emigi7su.zz).
+
+upgraded stub would be able to query and publish its information in a similar fashion for diagnostic purposes.
+However, upgraded stub would also "walk" the topology of forwarder #1, forwarder #2, and resolver.
+The stub would attempt to establish a direct connection to resolver, validate resolver's certificate via TLSA,
+and have a resulting encrypted DoT session for doing DNS resolution.
+
+A client doing DoH to the upgraded local stub, would not need to validate the certificate presented (since it would be on the local host loopback of 127.0.0.1 or ::1). Queries would the be directly sent over the DoT connection to the upgraded resolver.
 
 # Security Considerations
 
