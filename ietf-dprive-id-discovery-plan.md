@@ -213,6 +213,30 @@ The stub client MUST determine the direct reachability of all discovered resolve
 
 The validation should include independent validation of the data in an "upstream" publication set against the data published on the authoritative side of the upstream server itself.
 
+# High Level "Diagram" in ASCII
+
+The "before" picture representing a fairly simple example topology involving stub, forwarders, and resolver:
+
+Client (application) -> stub -> forwarder -> forwarder -> resolver
+
+The "first iteration" with a minimum set of upgraded services/servers:
+
+Client (application) -> stub -> local upgraded "stub" forwarder -> forwarder #1 -> forwarder #2 -> upgraded resolver
+
+The "incremental" iteration:
+
+Client -> stub -> local upgraded "stub" forwarder -> upgraded forwarder #1 -> forwarder #2 -> upgraded resolver
+
+The "final" iteration for the same topology:
+
+Client -> stub -> local upgraded "stub" forwarder -> upgraded forwarder #1 -> upgraded forwarder #2 -> upgraded resolver
+
+If we assign server names to upgraded entities, as follows:
+upgraded "stub":
+upgraded forwarder #1:
+upgraded forwarder #2:
+upgraded resolver: 
+
 # Security Considerations
 
 This entire document concerns the security of DNS traffic, so a specific section on security is superfluous. 
@@ -232,9 +256,10 @@ FIXME.
 The DNS resolving process involves several entities.  These entities have different interests/requirements, and hence it does make sense to examine the interests of those entities separately - though in many cases their interests are aligned.  Four different entities can be identified, and their interests are described in the following sections:
 
 - Users
-- Operators
+- Stubs
+- Forwarder/Recursive Operators
 - Implementors / Software Developers
-- Researchers
+- Researchers (?)
 
 ## The User Perspective and Use Cases
 
@@ -252,37 +277,20 @@ Encryption/privacy status signaling, via in-band well-known DNS targets(?): some
 
 **TODO**: Actual requirements - what do users "want"? Start below:
 
+## The Stub Perspective and Use Cases
+
+The stub client may be the original system library or software package on a host, or may be an upgraded version of the same, or may be a local service deployed (e.g. on loopback) to faciliate the upgraded feature set described in this document.
+
+The stub will be the more complex element, in terms of being required to make limited informed policy decisions based on published information, and in terms of collecting, collating, and maintaining topology and status information regarding forwarders and resolvers. The basic design should be robust, ideally based on some sort of finite state model which is able to handle every potential combination of conditions in a well-defined manner, particularly without requiring user input (beyond simple preferences as input).
+
 ## The Operator Perspective and Use Cases
 
-Operators of authoritative services have to provide stable and fast DNS services, and interact with a wide range of clients, not all of them authoritative servers. The operator side actually consists of two sides:
+Operators of forwarders and recursive services have to provide stable and fast DNS services, and interact with a wide range of clients. This document is only concerned with the stub -> (forwarder*) -> recursive paths, for establishing direct stub -> recursive connections where possible.
 
-  * The "upstream" facing side of recursive resolvers
-  * The "downstream" side of authoritative servers
+Forwarders and recursives may be (and frequently are) relatively autonomous, possibly embedded software systems, which may not have skilled operators available to address complex issues. However, large recursive operators are likely to have skilled staff and may even develop or maintain their own software.
 
-Those two sides are typically operated by different entities, but many entities operate "both sides".  Even though that is discouraged (**TODO** source), the two sides might even be operated on the same nameserver.
 
   * Maybe different technical perspectives for operators
-    * Intelligence (sharing information)
-    * SLD popularity for marketing
-  * Focus initially on Second Level Domains (SLDs) initially
-    * Is there a difference for TLDs vs. SLDs from a "protocol" perspective?
-  * Monitoring and aggregated data analysis
-  * Signaling provisioning information
-    * New record type for finding authoritative server key and authentication?  Use SRV?  (Being able to use different servers for serving up DNS-over-{TCP,UDP} vs DNS-over-TLS responses may be valuable.
-    * Signal secure transport details (DNS-over-TLS, DNS-over-QUIC, EncryptedSNI, connectionless, etc.), perhaps in an extensible manner?  Minimize RTTs and reduce need for trials.
-    * Large provider use cases where the NS names are out of bailiwick for the zone (e.g. small number of distinct NS records serving 100k+ zones)
-  * EDNS client subnet (JL: Not sure ECS crosses the cost/benefit threshold to be included as a requirement and many CDNs that run auth servers will likely say ECS is quite operationally important)
-  * Decide between TLS and connectionless (such as COSE-based messages)
-  * Costs of TLS connection vs. connectionless
-    * Technical solution, e.g. encryption of the DNS query, shouldn't enable an attack vector for DDoS or resource exhaustion. For example, only if the client uses DNS-over-TLS, the upstream query to the authoritative will be over DNS-over-TLS also.  If the client uses UDP, the resolver won't invest resources in DNS-over-TLS to prevent a potential resource exhaustion attack.
-    * Reuse connection state (if any) and examine resumption considerations
-    * Minimize server-side state (eg, with session tickets)
-    * Need empirical studies on capacity, traffic, attack vectors
-    * Evaluate impact on architecture and footprint expansion
-    * Analyze optimal persistent connection time/time-out
-    * Analyze optimal number of persistent connections recursive resolvers should maintain
-    * Consider operational concerns with respect to capabilities signaling
-    * Develop a profile that has operational advantages for operators
 
 **TODO**: Actual requirements - what do operators “want”?
 
